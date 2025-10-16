@@ -1,0 +1,129 @@
+import React, { useState } from "react";
+import { Form } from "react-router-dom";
+import Title from "../../components/Title";
+import { assets } from "../../assets/assets";
+
+const AddRooms = () => {
+  const [images, setImages] = useState({
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+  });
+
+  const [input, setInput] = useState({
+    roomType: "",
+    pricePerNight: 0,
+    amenities: {
+      "Free Wi-Fi": false,
+      "Air Conditioning": false,
+      "Room Service": false,
+      "Free Swimming Pool": false,
+      "Mountain View": false,
+    },
+  });
+
+  return (
+    <form>
+      <Title
+        align={"left"}
+        font={"outfit"}
+        title={"Add Room"}
+        subTitle={
+          "Fill in the details carefully and accurate room details, pricing, and amenities, to enhance the user booking experience."
+        }
+      />
+      {/* Upload Area For Images */}
+      <p className="text-gray-800 mt-10">Images</p>
+      <div className="grid grid-cols-2 sm:flex gap-4 my-2 flex-wrap">
+        {Object.keys(images).map((key) => (
+          <label htmlFor={`roomImage${key}`} key={key}>
+            <img
+              src={
+                images[key]
+                  ? URL.createObjectURL(images[key])
+                  : assets.uploadArea
+              }
+              className="max-h-13 cursor-pointer opacity-80 "
+              alt=""
+            />
+            <input
+              type="file"
+              accept="image/*"
+              id={`roomImage${key}`}
+              hidden
+              onChange={(e) =>
+                setImages({ ...images, [key]: e.target.files[0] })
+              }
+            />
+          </label>
+        ))}
+      </div>
+
+      <div className="w-full flex max-sm:flex-col sm:gap-4 mt-4">
+        {/* Room Type */}
+        <div className="flex-1 max-w-48">
+          <p className="text-gray-800 mt-4">Room Type</p>
+          <select
+            onChange={(e) => setInput({ ...input, roomType: e.target.value })}
+            value={input.roomType}
+            className="border opacity-70 border-gray-300 mt-1 rounded p-2 w-full"
+          >
+            <option value="">Select Room Type</option>
+            <option value="King Bed">King Bed</option>
+            <option value="Twin Bed">Twin Bed</option>
+            <option value="Deluxe King Bed">Deluxe King Bed</option>
+            <option value="Deluxe Twin Bed">Deluxe Twin Bed</option>
+            {/* 3 persons can stay in family suite */}
+            <option value="Family Suite">Family Suite</option>
+          </select>
+        </div>
+
+        {/* Price Of Room */}
+        <div>
+          <p className="text-gray-900 mt-4">
+            Price <span className="text-xs">/night</span>
+          </p>
+          <input
+            type="number"
+            placeholder="0"
+            className="border border-gray-300 mt-1 rounded p-2 w-24"
+            value={input.pricePerNight}
+            onCanPlay={(e) =>
+              setInput({ ...input, pricePerNight: e.target.value })
+            }
+          />
+        </div>
+      </div>
+
+      {/* Amenities */}
+      <p className="text-gray-800 mt-4">Amenities</p>
+      <div className="flex flex-col flex-wrap mt-1 text-gray-400 max-w-sm">
+        {Object.keys(input.amenities).map((amenity, index) => (
+          <div key={index}>
+            <input
+              type="checkbox"
+              id={`amenities${index + 1}`}
+              checked={input.amenities[amenity]}
+              onChange={() =>
+                setInput({
+                  ...input,
+                  amenities: {
+                    ...input.amenities,
+                    [amenity]: !input.amenities[amenity],
+                  },
+                })
+              }
+            />
+            <label htmlFor={`amenities${index + 1}`}> {amenity}</label>
+          </div>
+        ))}
+      </div>
+      <button className="bg-primary text-white px-8 py-2 rounded mt-8  cursor-pointer">
+        Add Room
+      </button>
+    </form>
+  );
+};
+
+export default AddRooms;

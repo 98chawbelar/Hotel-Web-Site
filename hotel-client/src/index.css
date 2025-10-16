@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Outfit:wght@100..900&display=swap');
+
+ 
+@import "tailwindcss";
+
+*{
+  font-family:"Outfit", sans-serif;
+  overflow-x: hidden;
+
+}
+
+
+h1{
+  font-family: "ED Garamond", serif !important;
+}
+
+@theme {
+  --color-primary:#2563EB;  
+  --color-secondary: #FBBF24; 
+  --color-sidebar: #27667B;    
+  --color-button:#FFC94D ;    
+  --color-active:#C99700;      
+  
+}
+
+
