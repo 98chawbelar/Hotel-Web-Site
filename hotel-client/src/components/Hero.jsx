@@ -1,7 +1,33 @@
 import { CiCalendar, CiSearch } from "react-icons/ci";
 import { cities } from "../assets/assets";
+import { useState } from "react";
+import { useAppContext } from "../context/AppContext";
 
 const Hero = () => {
+  const { navigate, getToken, axios, setSearchedCities } = useAppContext();
+  const [destination, setDestination] = useState("");
+
+  const onSearch = async (e) => {
+    e.preventDefault();
+    navigate(`/rooms?destination = ${destination}`);
+
+    // call api to save recent searched city
+    await axios.post(
+      "/api/user/store-recent-search",
+      { recentSearchedCity: destination },
+      { headers: { Authorization: `Bearer ${await getToken()}` } }
+    );
+
+    // Add destination to searchedCities max 3 recent searched cities
+    setSearchedCities((prevSearchedCities) => {
+      const updatedSearchedCities = [...prevSearchedCities, destination];
+      if (updatedSearchedCities > 3) {
+        updatedSearchedCities.shift();
+      }
+      return updatedSearchedCities;
+    });
+  };
+
   return (
     <div
       className="flex flex-col text-white items-start justify-center 
@@ -27,6 +53,7 @@ const Hero = () => {
 
       {/* Form */}
       <form
+        onSubmit={onSearch}
         className="bg-white text-gray-700  rounded-lg px-6 py-4 mt-8 
         flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-4xl"
       >
@@ -37,6 +64,8 @@ const Hero = () => {
             <label htmlFor="destinationInput">Destination</label>
           </div>
           <input
+            onChange={(e) => setDestination(e.target.value)}
+            value={destination}
             list="destinations"
             id="destinationInput"
             type="text"

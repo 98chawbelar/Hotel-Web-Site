@@ -1,23 +1,88 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  facilityIcons,
-  roomCommonData,
-  roomsDummyData,
-} from "../assets/assets";
+import { facilityIcons, roomCommonData } from "../assets/assets";
 import { StarRating } from "../components/StarRating";
 import { CiLocationOn } from "react-icons/ci";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const RoomDetails = () => {
   const { id } = useParams();
+  const { rooms, getToken, axios, navigate } = useAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [guests, setGuests] = useState(1);
+
+  const [isAvailable, setIsAvailable] = useState(false);
+
+  // Check If Room is Available
+  const checkAvailability = async () => {
+    try {
+      // Check is Check-In Date is greater than Check-Out Date
+      if (checkInDate >= checkOutDate) {
+        toast.error("Can Not Check-In Before Check-Out Date ");
+        return;
+      }
+      const { data } = await axios.post("/api/bookings/check-availability", {
+        room: id,
+        checkInDate,
+        checkOutDate,
+      });
+      if (data.success) {
+        if (data.isAvailable) {
+          setIsAvailable(true);
+          toast.success("Room is Available");
+        } else {
+          setIsAvailable(false);
+          toast.error("Room is not Available");
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  //  OnSubmitHandler for check availability & book the room
+  const onSubmitHandler = async (e) => {
+    try {
+      e.preventDefault();
+      if (!isAvailable) {
+        return checkAvailability();
+      } else {
+        const { data } = await axios.post(
+          "/api/bookings/book",
+          {
+            room: id,
+            checkInDate,
+            checkOutDate,
+            guests,
+            paymentMethod: "Pay At Hotel",
+          },
+          { headers: { Authorization: `Bearer ${await getToken()}` } }
+        );
+        if (data.success) {
+          toast.success(data.message);
+          navigate("/my-bookings");
+          scrollTo(0, 0);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   useEffect(() => {
-    const room = roomsDummyData.find((room) => room._id === id);
+    const room = rooms.find((room) => room._id === id);
     room && setRoom(room);
     room && setMainImage(room.images[0]);
-  }, []);
+  }, [rooms]);
+
   return (
     room && (
       <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
@@ -96,13 +161,20 @@ const RoomDetails = () => {
         </div>
 
         {/* Check In Check Out Form */}
-        <form className="flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl gap-6">
+        <form
+          onSubmit={onSubmitHandler}
+          className="flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl gap-6"
+        >
           <div className="flex flex-col flex-wrap md:flex-row items-start md:items-center gap-4 md:gap-10 text-gray-500">
             <div className="flex flex-col">
               <label htmlFor="checkInDate" className="font-medium">
                 Check-In
               </label>
               <input
+                onChange={(e) => {
+                  setCheckInDate(e.target.value);
+                }}
+                min={new Date().toISOString().split("T")[0]}
                 className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none"
                 type="date"
                 id="checkInDate"
@@ -116,6 +188,11 @@ const RoomDetails = () => {
                 Check-Out
               </label>
               <input
+                onChange={(e) => {
+                  setCheckOutDate(e.target.value);
+                }}
+                min={checkInDate}
+                disabled={!checkInDate}
                 className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none"
                 type="date"
                 id="checkOutDate"
@@ -129,10 +206,14 @@ const RoomDetails = () => {
                 Guests
               </label>
               <input
+                onChange={(e) => {
+                  setGuests(e.target.value);
+                }}
+                value={guests}
                 className="max-w-20 rounded border border-gray-300 px-3 py-1.5 mt-1.5 outline-none"
                 type="number"
                 id="guests"
-                placeholder="0"
+                placeholder="1"
                 required
               />
             </div>
@@ -142,7 +223,7 @@ const RoomDetails = () => {
             type="submit"
             className="bg-primary/80 hover:bg-primary active:scale-95 transition-all text-white rounded-md w-full md:w-auto md:justify-self-end px-6 py-3 md:py-4 text-base cursor-pointer"
           >
-            Check Availability
+            {isAvailable ? "Book Now" : "Check Availability"}
           </button>
         </form>
 
@@ -150,11 +231,15 @@ const RoomDetails = () => {
         <div className="mt-25 space-y-4">
           {roomCommonData.map((spec, index) => (
             <div key={index} className="flex items-start gap-2">
-              <img
-                src={spec.icon}
-                alt={`${spec.title}-icon`}
-                className="w-6.5"
-              />
+              {typeof spec.icon === "string" ? (
+                <img
+                  src={spec.icon}
+                  alt={`${spec.title}-icon`}
+                  className="w-6 h-6 object-contain"
+                />
+              ) : (
+                <spec.icon className="w-6 h-6 " />
+              )}
               <div className="">
                 <p className="text-base">{spec.title}</p>
                 <p className="text-gray-500">{spec.description}</p>

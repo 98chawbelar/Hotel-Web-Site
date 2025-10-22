@@ -4,9 +4,7 @@ import freeBreakfastIcon from "./freeBreakfastIcon.svg";
 import roomServiceIcon from "./roomServiceIcon.svg";
 import mountainIcon from "./mountainIcon.svg";
 import poolIcon from "./poolIcon.svg";
-import homeIcon from "./homeIcon.svg";
 
-import badgeIcon from "./badgeIcon.svg";
 import guestsIcon from "./guestsIcon.svg";
 import roomImg1 from "./roomImg1.webp";
 import roomImg2 from "./roomImg2.webp";
@@ -16,8 +14,11 @@ import regImage from "./regImage.png";
 import exclusiveOfferCardImg1 from "./exclusiveOfferCardImg1.png";
 import exclusiveOfferCardImg2 from "./exclusiveOfferCardImg2.png";
 import exclusiveOfferCardImg3 from "./exclusiveOfferCardImg3.png";
-
 import uploadArea from "./uploadArea.svg";
+import { MdOutlineLocationOn } from "react-icons/md";
+import { HiOutlineBadgeCheck } from "react-icons/hi";
+import { FaHeart } from "react-icons/fa";
+import { FaHouse } from "react-icons/fa6";
 
 export const assets = {
   logo,
@@ -27,9 +28,6 @@ export const assets = {
   roomServiceIcon,
   mountainIcon,
   poolIcon,
-
-  homeIcon,
-  badgeIcon,
 
   guestsIcon,
   regImage,
@@ -114,19 +112,23 @@ export const facilityIcons = {
 // For Room Details Page
 export const roomCommonData = [
   {
-    icon: assets.homeIcon,
+    icon: FaHouse,
     title: "Clean & Safe Stay",
     description: "A well-maintained and hygienic space just for you.",
   },
   {
+    icon: HiOutlineBadgeCheck,
     title: "Enhanced Cleaning",
     description: "This host follows Staybnb's strict cleaning standards.",
   },
+
   {
+    icon: MdOutlineLocationOn,
     title: "Excellent Location",
     description: "90% of guests rated the location 5 stars.",
   },
   {
+    icon: FaHeart,
     title: "Smooth Check-In",
     description: "100% of guests gave check-in a 5-star rating.",
   },

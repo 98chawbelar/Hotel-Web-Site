@@ -1,11 +1,47 @@
-import React from "react";
 import { assets, cities } from "../assets/assets";
 import { IoCloseSharp } from "react-icons/io5";
+import { useAppContext } from "../context/AppContext";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const HotelRegistration = () => {
+  const { setShowHotelReg, axios, getToken, setIsOwner } = useAppContext();
+
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [contact, setContact] = useState("");
+  const [city, setCity] = useState("");
+
+  const onSubmitHandler = async (event) => {
+    try {
+      event.preventDefault();
+      const { data } = await axios.post(
+        `/api/hotels/`,
+        { name, contact, address, city },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        setIsOwner(true);
+        setShowHotelReg(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   return (
-    <div className="fixed top-0 bottom-0 left-0 right-0 z-100 flex items-center justify-center bg-black/70">
-      <form className="flex bg-white rounded-xl max-w-4xl max-md:mx-2">
+    <div
+      onClick={() => setShowHotelReg(false)}
+      className="fixed top-0 bottom-0 left-0 right-0 z-100 flex items-center justify-center bg-black/70"
+    >
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={onSubmitHandler}
+        className="flex bg-white rounded-xl max-w-4xl max-md:mx-2"
+      >
         <img
           src={assets.regImage}
           alt="reg-image"
@@ -15,6 +51,7 @@ const HotelRegistration = () => {
           <IoCloseSharp
             alt="close-icon"
             className="absolute text-secondary top-4 right-4 w-4 h-4 cursor-pointer"
+            onClick={() => setShowHotelReg(false)}
           />
           <p className="text-2xl font-semibold mt-6">Register Your Hotel</p>
 
@@ -25,6 +62,8 @@ const HotelRegistration = () => {
             </label>
             <input
               id="name"
+              onChange={(e) => setName(e.target.value)}
+              value={name}
               type="text"
               placeholder="Type Here"
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-300 font-light "
@@ -40,6 +79,8 @@ const HotelRegistration = () => {
             <input
               id="contact"
               type="text"
+              onChange={(e) => setContact(e.target.value)}
+              value={contact}
               placeholder="Type Here"
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-300 font-light "
               required
@@ -53,6 +94,8 @@ const HotelRegistration = () => {
             </label>
             <input
               id="address"
+              onChange={(e) => setAddress(e.target.value)}
+              value={address}
               type="text"
               placeholder="Type Here"
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-300 font-light "
@@ -68,6 +111,8 @@ const HotelRegistration = () => {
             <select
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-300 font-light"
               id="city"
+              onChange={(e) => setCity(e.target.value)}
+              value={city}
               required
             >
               <option value="" disabled selected>
